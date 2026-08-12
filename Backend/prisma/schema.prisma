@@ -1,0 +1,284 @@
+// DevFlow — Prisma schema
+// Phase 1 (Auth, Organizations, Members, Roles) is fully modeled.
+// Later-phase tables (Project, Task, Comment, Attachment, Notification,
+// Activity, Subscription) are included now so migrations don't need
+// destructive rewrites later — but application logic for them ships in
+// their respective phases.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MANAGER
+  DEVELOPER
+  VIEWER
+}
+
+enum ProjectStatus {
+  PLANNED
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+// ─────────────────────────────────────────────────────────
+// Phase 1 — Auth, Organizations, Members
+// ─────────────────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  avatarUrl         String?
+  isEmailVerified   Boolean   @default(false)
+  emailVerifyToken  String?   @unique
+  emailVerifyExpiry DateTime?
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
+  refreshTokenHash  String? // last-issued refresh token, hashed (rotation)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  memberships     OrganizationMember[]
+  createdProjects Project[]            @relation("ProjectCreatedBy")
+  assignedTasks   Task[]               @relation("TaskAssignee")
+  createdTasks    Task[]               @relation("TaskCreatedBy")
+  comments        Comment[]
+  attachments     Attachment[]
+  notifications   Notification[]
+  activities      Activity[]
+  projectMembers  ProjectMember[]
+
+  @@map("users")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members       OrganizationMember[]
+  projects      Project[]
+  notifications Notification[]
+  activities    Activity[]
+  subscription  Subscription?
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrgRole  @default(DEVELOPER)
+  joinedAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+// ─────────────────────────────────────────────────────────
+// Phase 2 — Projects & Tasks
+// ─────────────────────────────────────────────────────────
+
+model Project {
+  id             String        @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  status         ProjectStatus @default(PLANNED)
+  startDate      DateTime?
+  deadline       DateTime?
+  createdById    String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User            @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  members      ProjectMember[]
+  tasks        Task[]
+  activities   Activity[]
+
+  @@index([organizationId])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  assigneeId  String?
+  createdById String
+  dueDate     DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdBy   User         @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  labels      TaskLabel[]
+  comments    Comment[]
+  attachments Attachment[]
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@map("tasks")
+}
+
+model TaskLabel {
+  id     String @id @default(cuid())
+  taskId String
+  name   String
+  color  String @default("#6366f1")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_labels")
+}
+
+// ─────────────────────────────────────────────────────────
+// Phase 3 — Collaboration
+// ─────────────────────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([taskId])
+  @@map("comments")
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  taskId       String
+  uploadedById String
+  url          String
+  fileName     String
+  fileType     String
+  fileSize     Int
+  createdAt    DateTime @default(now())
+
+  task       Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+
+  @@index([taskId])
+  @@map("attachments")
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  type           String
+  message        String
+  isRead         Boolean  @default(false)
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model Activity {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String?
+  actorId        String
+  action         String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  actor        User         @relation(fields: [actorId], references: [id])
+
+  @@index([organizationId])
+  @@map("activities")
+}
+
+// ─────────────────────────────────────────────────────────
+// Phase 5 — Subscriptions
+// ─────────────────────────────────────────────────────────
+
+model Subscription {
+  id             String           @id @default(cuid())
+  organizationId String           @unique
+  plan           SubscriptionPlan @default(FREE)
+  seats          Int              @default(5)
+  renewsAt       DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
