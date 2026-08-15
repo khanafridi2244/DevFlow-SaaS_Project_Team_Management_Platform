@@ -37,6 +37,7 @@ const authLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => env.nodeEnv === "test",
   message: { success: false, message: "Too many attempts, please try again later" },
 });
 
@@ -45,6 +46,7 @@ const globalLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => env.nodeEnv === "test",
 });
 
 app.use(globalLimiter);
