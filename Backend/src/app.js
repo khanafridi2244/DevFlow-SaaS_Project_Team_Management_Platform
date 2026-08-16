@@ -10,6 +10,8 @@ const { errorMiddleware } = require("./middleware/error.middleware");
 const { ApiError } = require("./utils/apiError");
 
 const authRoutes = require("./modules/auth/auth.routes");
+const organizationRoutes = require("./modules/organizations/organization.routes");
+const projectRoutes = require("./modules/projects/project.routes");
 
 const app = express();
 
@@ -58,11 +60,9 @@ app.get("/health", (req, res) => {
 
 // ── Routes ───────────────────────────────────────────────
 app.use("/api/auth", authLimiter, authRoutes);
-// Phase 1 continued: app.use("/api/users", usersRoutes);
-
-const organizationRoutes = require("./modules/organizations/organization.routes");
-// ...
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/projects", projectRoutes);
+// Phase 2 continued: app.use("/api/tasks", taskRoutes);
 
 // ── 404 handler ─────────────────────────────────────────
 app.use((req, res, next) => {
