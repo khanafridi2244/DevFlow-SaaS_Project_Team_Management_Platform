@@ -1,7 +1,12 @@
 const { prisma } = require("../src/config/prisma");
 
-// Wipe tables touched by Phase 1 tests before each test, in FK-safe order
 async function cleanDatabase() {
+  await prisma.taskLabel.deleteMany();
+  await prisma.comment.deleteMany();
+  await prisma.attachment.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.projectMember.deleteMany();
+  await prisma.project.deleteMany();
   await prisma.organizationMember.deleteMany();
   await prisma.subscription.deleteMany();
   await prisma.organization.deleteMany();
