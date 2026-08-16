@@ -13,6 +13,11 @@ const authRoutes = require("./modules/auth/auth.routes");
 const organizationRoutes = require("./modules/organizations/organization.routes");
 const projectRoutes = require("./modules/projects/project.routes");
 const taskRoutes = require("./modules/tasks/task.routes");
+const commentRoutes = require("./modules/comments/comment.routes");
+const activityRoutes = require("./modules/activities/activity.routes");
+const notificationRoutes = require("./modules/notifications/notification.routes");
+
+
 
 
 const app = express();
@@ -65,6 +70,11 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/activities", activityRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+
 
 // ── 404 handler ─────────────────────────────────────────
 app.use((req, res, next) => {
