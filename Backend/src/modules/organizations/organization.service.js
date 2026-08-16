@@ -64,7 +64,7 @@ async function getUserOrganizations(userId) {
   }));
 }
 
-async function getOrganizationById(organizationId) {
+async function getOrganizationById(organizationId, requestingUserId) {
   const organization = await prisma.organization.findUnique({
     where: { id: organizationId },
     include: {
@@ -81,6 +81,11 @@ async function getOrganizationById(organizationId) {
 
   if (!organization) {
     throw ApiError.notFound("Organization not found");
+  }
+
+  const isMember = organization.members.some((m) => m.userId === requestingUserId);
+  if (!isMember) {
+    throw ApiError.forbidden("You are not a member of this organization");
   }
 
   return organization;

@@ -13,7 +13,7 @@ const getMyOrganizations = asyncHandler(async (req, res) => {
 });
 
 const getOrganization = asyncHandler(async (req, res) => {
-  const organization = await service.getOrganizationById(req.params.organizationId);
+  const organization = await service.getOrganizationById(req.params.organizationId, req.user.id);
   new ApiResponse(200, { organization }, "Organization fetched").send(res);
 });
 
