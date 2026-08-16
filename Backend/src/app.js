@@ -12,6 +12,8 @@ const { ApiError } = require("./utils/apiError");
 const authRoutes = require("./modules/auth/auth.routes");
 const organizationRoutes = require("./modules/organizations/organization.routes");
 const projectRoutes = require("./modules/projects/project.routes");
+const taskRoutes = require("./modules/tasks/task.routes");
+
 
 const app = express();
 
@@ -62,7 +64,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/projects", projectRoutes);
-// Phase 2 continued: app.use("/api/tasks", taskRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // ── 404 handler ─────────────────────────────────────────
 app.use((req, res, next) => {
