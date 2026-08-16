@@ -1,6 +1,8 @@
 const { prisma } = require("../src/config/prisma");
 
 async function cleanDatabase() {
+  await prisma.notification.deleteMany();
+  await prisma.activity.deleteMany();
   await prisma.taskLabel.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.attachment.deleteMany();
