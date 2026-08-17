@@ -1,23 +1,25 @@
 const { prisma } = require("../../config/prisma");
+const { emitToUser } = require("../../config/socket");
 
-// Fire-and-forget helper: creates a notification row for a single user.
-// Deliberately swallows errors rather than throwing — a failed
-// notification should never block or fail the action that triggered it
-// (e.g. a comment should still save even if notification insert fails).
 async function createNotification({ organizationId, userId, type, message, metadata = null }) {
   try {
-    return await prisma.notification.create({
+    const notification = await prisma.notification.create({
       data: { organizationId, userId, type, message, metadata },
     });
+
+    // Push it live to any open tab/device the user has connected.
+    // If they're offline, this silently does nothing — they'll still
+    // see it in their notification list next time they load the app,
+    // since it's already saved in the DB above.
+    emitToUser(userId, "notification:new", notification);
+
+    return notification;
   } catch (err) {
     console.error("Failed to create notification:", err);
     return null;
   }
 }
 
-// Notifies a task's assignee and creator when something happens on the
-// task (e.g. a new comment) — skips the person who triggered the event
-// and de-duplicates if assignee and creator are the same person.
 async function notifyTaskParticipants({ task, excludeUserId, type, message, metadata = null }) {
   const recipientIds = new Set(
     [task.assigneeId, task.createdById].filter((id) => id && id !== excludeUserId)
@@ -36,9 +38,6 @@ async function notifyTaskParticipants({ task, excludeUserId, type, message, meta
   );
 }
 
-// Resolves @handles to real users within the organization (matches on
-// first name, case-insensitively, as a simple v1 approach) and notifies
-// each one — used for @mentions in comments.
 async function notifyMentionedUsers({ organizationId, handles, excludeUserId, message, metadata = null }) {
   if (handles.length === 0) return;
 
@@ -75,7 +74,7 @@ async function listMyNotifications(userId, { unreadOnly = false, limit = 50 } = 
 async function markAsRead(notificationId, userId) {
   const notification = await prisma.notification.findUnique({ where: { id: notificationId } });
   if (!notification || notification.userId !== userId) {
-    return null; // silently no-op — reading someone else's notification isn't a real error case
+    return null;
   }
   return prisma.notification.update({ where: { id: notificationId }, data: { isRead: true } });
 }

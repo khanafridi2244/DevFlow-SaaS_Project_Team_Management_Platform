@@ -1,9 +1,15 @@
+const http = require("http");
 const { app } = require("./app");
 const { env } = require("./config/env");
 const { prisma } = require("./config/prisma");
+const { initSocket } = require("./config/socket");
 
-const server = app.listen(env.port, () => {
+const httpServer = http.createServer(app);
+initSocket(httpServer);
+
+const server = httpServer.listen(env.port, () => {
   console.log(`✅ DevFlow API running on http://localhost:${env.port} [${env.nodeEnv}]`);
+  console.log(`✅ Socket.IO listening for real-time connections`);
 });
 
 async function shutdown(signal) {
@@ -14,7 +20,6 @@ async function shutdown(signal) {
     process.exit(0);
   });
 
-  // Force-exit if graceful shutdown hangs for too long
   setTimeout(() => process.exit(1), 10_000).unref();
 }
 
