@@ -29,8 +29,14 @@ const env = {
     accessTokenName: process.env.ACCESS_TOKEN_COOKIE ?? "devflow_at",
     refreshTokenName: process.env.REFRESH_TOKEN_COOKIE ?? "devflow_rt",
   },
-
+ 
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS ?? 12),
+
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? "",
+    apiKey: process.env.CLOUDINARY_API_KEY ?? "",
+    apiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
+  },
 
   isProduction: process.env.NODE_ENV === "production",
 };
