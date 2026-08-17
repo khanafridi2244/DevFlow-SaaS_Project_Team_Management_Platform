@@ -16,6 +16,7 @@ const taskRoutes = require("./modules/tasks/task.routes");
 const commentRoutes = require("./modules/comments/comment.routes");
 const activityRoutes = require("./modules/activities/activity.routes");
 const notificationRoutes = require("./modules/notifications/notification.routes");
+const attachmentRoutes = require("./modules/attachments/attachment.routes");
 
 
 
@@ -73,7 +74,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/attachments", attachmentRoutes);
 
 
 // ── 404 handler ─────────────────────────────────────────
