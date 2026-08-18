@@ -17,6 +17,7 @@ const commentRoutes = require("./modules/comments/comment.routes");
 const activityRoutes = require("./modules/activities/activity.routes");
 const notificationRoutes = require("./modules/notifications/notification.routes");
 const attachmentRoutes = require("./modules/attachments/attachment.routes");
+const analyticsRoutes = require("./modules/analytics/analytics.routes");
 
 
 
@@ -75,7 +76,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/attachments", attachmentRoutes);
-
+app.use("/api/analytics", analyticsRoutes);
 
 // ── 404 handler ─────────────────────────────────────────
 app.use((req, res, next) => {
