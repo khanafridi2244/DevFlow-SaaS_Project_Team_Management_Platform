@@ -1,31 +1,35 @@
 const { prisma } = require("../../config/prisma");
 const { assertOrgMembership } = require("../projects/project.service");
+const { cached, invalidatePrefix } = require("../../config/redis");
 
 // Every analytics query is scoped to an organization and requires the
 // requester to actually belong to it — same permission chain as
 // everything else, analytics just reads across projects instead of
 // touching just one.
+
 async function getOrganizationOverview(organizationId, userId) {
   await assertOrgMembership(organizationId, userId);
 
-  const projectIds = (
-    await prisma.project.findMany({ where: { organizationId }, select: { id: true } })
-  ).map((p) => p.id);
+  return cached(`analytics:overview:${organizationId}`, 60, async () => {
+    const projectIds = (
+      await prisma.project.findMany({ where: { organizationId }, select: { id: true } })
+    ).map((p) => p.id);
 
-  const [totalTasks, completedTasks, inProgressTasks, overdueTasks] = await Promise.all([
-    prisma.task.count({ where: { projectId: { in: projectIds } } }),
-    prisma.task.count({ where: { projectId: { in: projectIds }, status: "DONE" } }),
-    prisma.task.count({ where: { projectId: { in: projectIds }, status: "IN_PROGRESS" } }),
-    prisma.task.count({
-      where: {
-        projectId: { in: projectIds },
-        status: { not: "DONE" },
-        dueDate: { lt: new Date() },
-      },
-    }),
-  ]);
+    const [totalTasks, completedTasks, inProgressTasks, overdueTasks] = await Promise.all([
+      prisma.task.count({ where: { projectId: { in: projectIds } } }),
+      prisma.task.count({ where: { projectId: { in: projectIds }, status: "DONE" } }),
+      prisma.task.count({ where: { projectId: { in: projectIds }, status: "IN_PROGRESS" } }),
+      prisma.task.count({
+        where: {
+          projectId: { in: projectIds },
+          status: { not: "DONE" },
+          dueDate: { lt: new Date() },
+        },
+      }),
+    ]);
 
-  return { totalTasks, completedTasks, inProgressTasks, overdueTasks };
+    return { totalTasks, completedTasks, inProgressTasks, overdueTasks };
+  });
 }
 
 async function getTasksByPriority(organizationId, userId) {
@@ -41,8 +45,6 @@ async function getTasksByPriority(organizationId, userId) {
     _count: { _all: true },
   });
 
-  // Ensure every priority level appears even if it has zero tasks —
-  // a chart component shouldn't have to handle "this key might not exist"
   const result = { LOW: 0, MEDIUM: 0, HIGH: 0, URGENT: 0 };
   grouped.forEach((g) => {
     result[g.priority] = g._count._all;
@@ -102,36 +104,34 @@ async function getTeamWorkload(organizationId, userId) {
 async function getProjectProgress(organizationId, userId) {
   await assertOrgMembership(organizationId, userId);
 
-  const projects = await prisma.project.findMany({
-    where: { organizationId },
-    include: { _count: { select: { tasks: true } } },
+  return cached(`analytics:progress:${organizationId}`, 60, async () => {
+    const projects = await prisma.project.findMany({
+      where: { organizationId },
+      include: { _count: { select: { tasks: true } } },
+    });
+
+    return Promise.all(
+      projects.map(async (p) => {
+        const completedCount = await prisma.task.count({
+          where: { projectId: p.id, status: "DONE" },
+        });
+        const totalCount = p._count.tasks;
+        const percentComplete =
+          totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+
+        return {
+          projectId: p.id,
+          projectName: p.name,
+          status: p.status,
+          totalTasks: totalCount,
+          completedTasks: completedCount,
+          percentComplete,
+        };
+      })
+    );
   });
-
-  const progress = await Promise.all(
-    projects.map(async (p) => {
-      const completedCount = await prisma.task.count({
-        where: { projectId: p.id, status: "DONE" },
-      });
-      const totalCount = p._count.tasks;
-      const percentComplete = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
-
-      return {
-        projectId: p.id,
-        projectName: p.name,
-        status: p.status,
-        totalTasks: totalCount,
-        completedTasks: completedCount,
-        percentComplete,
-      };
-    })
-  );
-
-  return progress;
 }
 
-// Tasks completed per week, for a trend chart. Returns the last N weeks
-// (default 8) with a count for each — including weeks with zero
-// completions, same "always fill the gaps" principle as the priority chart.
 async function getTasksCompletedPerWeek(organizationId, userId, weeks = 8) {
   await assertOrgMembership(organizationId, userId);
 
@@ -151,9 +151,6 @@ async function getTasksCompletedPerWeek(organizationId, userId, weeks = 8) {
     select: { updatedAt: true },
   });
 
-  // Bucket into week-start dates (Monday) in JS rather than in SQL —
-  // keeps this portable and easy to read, and the dataset per org is
-  // small enough that this isn't a performance concern.
   const buckets = new Map();
   for (let i = 0; i < weeks; i++) {
     const weekStart = new Date(since);
@@ -174,6 +171,11 @@ async function getTasksCompletedPerWeek(organizationId, userId, weeks = 8) {
   return [...buckets.entries()].map(([weekStart, count]) => ({ weekStart, count }));
 }
 
+async function invalidateAnalyticsCache(organizationId) {
+  await invalidatePrefix(`analytics:overview:${organizationId}`);
+  await invalidatePrefix(`analytics:progress:${organizationId}`);
+}
+
 module.exports = {
   getOrganizationOverview,
   getTasksByPriority,
@@ -181,4 +183,5 @@ module.exports = {
   getTeamWorkload,
   getProjectProgress,
   getTasksCompletedPerWeek,
+  invalidateAnalyticsCache,
 };

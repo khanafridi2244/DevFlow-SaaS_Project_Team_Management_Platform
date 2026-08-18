@@ -1,6 +1,7 @@
 const { prisma } = require("../../config/prisma");
 const { ApiError } = require("../../utils/apiError");
 const { assertOrgMembership } = require("../projects/project.service");
+const { invalidateAnalyticsCache } = require("../analytics/analytics.service");
 
 const USER_SELECT = {
   id: true,
@@ -52,7 +53,7 @@ async function createTask(userId, { projectId, title, description, priority, ass
     }
   }
 
-  const task = await prisma.task.create({
+const task = await prisma.task.create({
     data: {
       projectId,
       title,
@@ -67,6 +68,8 @@ async function createTask(userId, { projectId, title, description, priority, ass
     },
     include: TASK_INCLUDE,
   });
+
+  await invalidateAnalyticsCache(project.organizationId);
 
   return task;
 }
@@ -139,11 +142,15 @@ async function updateTaskStatus(taskId, userId, status) {
   const task = await getTaskWithProject(taskId);
   await assertOrgMembership(task.project.organizationId, userId);
 
-  return prisma.task.update({
+  const updated = await prisma.task.update({
     where: { id: taskId },
     data: { status },
     include: TASK_INCLUDE,
   });
+
+  await invalidateAnalyticsCache(task.project.organizationId);
+
+  return updated;
 }
 
 async function deleteTask(taskId, userId) {
@@ -158,7 +165,9 @@ async function deleteTask(taskId, userId) {
   }
 
   await prisma.task.delete({ where: { id: taskId } });
+  await invalidateAnalyticsCache(task.project.organizationId);
 }
+
 
 async function addLabel(taskId, userId, { name, color }) {
   const task = await getTaskWithProject(taskId);
