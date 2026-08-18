@@ -2,6 +2,7 @@ const { prisma } = require("../../config/prisma");
 const { ApiError } = require("../../utils/apiError");
 const { assertOrgMembership } = require("../projects/project.service");
 const { invalidateAnalyticsCache } = require("../analytics/analytics.service");
+const { assertCanCreateTask } = require("../subscriptions/subscription.service");
 
 const USER_SELECT = {
   id: true,
@@ -42,7 +43,8 @@ async function getTaskWithProject(taskId) {
 }
 
 async function createTask(userId, { projectId, title, description, priority, assigneeId, dueDate, labels }) {
-  await getProjectAndAssertMembership(projectId, userId);
+  const project = await getProjectAndAssertMembership(projectId, userId);
+  await assertCanCreateTask(project.organizationId);
 
   if (assigneeId) {
     const isProjectMember = await prisma.projectMember.findUnique({
@@ -53,7 +55,7 @@ async function createTask(userId, { projectId, title, description, priority, ass
     }
   }
 
-const task = await prisma.task.create({
+  const task = await prisma.task.create({
     data: {
       projectId,
       title,
@@ -167,7 +169,6 @@ async function deleteTask(taskId, userId) {
   await prisma.task.delete({ where: { id: taskId } });
   await invalidateAnalyticsCache(task.project.organizationId);
 }
-
 
 async function addLabel(taskId, userId, { name, color }) {
   const task = await getTaskWithProject(taskId);

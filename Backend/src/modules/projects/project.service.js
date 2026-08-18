@@ -1,5 +1,6 @@
 const { prisma } = require("../../config/prisma");
 const { ApiError } = require("../../utils/apiError");
+const { assertCanCreateProject } = require("../subscriptions/subscription.service");
 
 const PROJECT_MEMBER_SELECT = {
   id: true,
@@ -24,7 +25,8 @@ async function assertOrgMembership(organizationId, userId) {
 
 async function createProject(userId, { organizationId, name, description, startDate, deadline }) {
   await assertOrgMembership(organizationId, userId);
-
+  await assertCanCreateProject(organizationId);
+  
   const project = await prisma.$transaction(async (tx) => {
     const created = await tx.project.create({
       data: {

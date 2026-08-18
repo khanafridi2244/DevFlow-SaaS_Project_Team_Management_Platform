@@ -1,6 +1,7 @@
 const { prisma } = require("../../config/prisma");
 const { ApiError } = require("../../utils/apiError");
 const { slugify } = require("./organization.validation");
+const { assertCanAddMember } = require("../subscriptions/subscription.service");
 
 async function generateUniqueSlug(name) {
   const base = slugify(name);
@@ -107,7 +108,10 @@ async function deleteOrganization(organizationId) {
 }
 
 async function inviteMember(organizationId, { email, role }) {
+  await assertCanAddMember(organizationId);
+
   const user = await prisma.user.findUnique({ where: { email } });
+  
   if (!user) {
     // Phase 1: user must already have a DevFlow account.
     // Phase 5: send an email invite that lets them register + auto-join.

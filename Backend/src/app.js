@@ -18,7 +18,7 @@ const activityRoutes = require("./modules/activities/activity.routes");
 const notificationRoutes = require("./modules/notifications/notification.routes");
 const attachmentRoutes = require("./modules/attachments/attachment.routes");
 const analyticsRoutes = require("./modules/analytics/analytics.routes");
-
+const subscriptionRoutes = require("./modules/subscriptions/subscription.routes");
 
 
 
@@ -77,6 +77,8 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/attachments", attachmentRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+
 
 // ── 404 handler ─────────────────────────────────────────
 app.use((req, res, next) => {
