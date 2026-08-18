@@ -89,6 +89,28 @@ const removeLabelSchema = z.object({
   query: z.object({}).optional(),
 });
 
+const calendarQuerySchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}).optional(),
+  query: z.object({
+    organizationId: z.string().min(1, "organizationId is required"),
+    month: z.string().regex(/^\d{4}-\d{2}$/, "month must be in YYYY-MM format"),
+  }),
+});
+
+const searchTasksQuerySchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}).optional(),
+  query: z.object({
+    organizationId: z.string().min(1, "organizationId is required"),
+    status: z.enum(TASK_STATUSES).optional(),
+    priority: z.enum(TASK_PRIORITIES).optional(),
+    assigneeId: z.string().optional(),
+    label: z.string().optional(),
+    search: z.string().max(200).optional(),
+  }),
+});
+
 module.exports = {
   TASK_STATUSES,
   TASK_PRIORITIES,
@@ -99,4 +121,6 @@ module.exports = {
   listTasksQuerySchema,
   addLabelSchema,
   removeLabelSchema,
+  calendarQuerySchema,
+  searchTasksQuerySchema,
 };

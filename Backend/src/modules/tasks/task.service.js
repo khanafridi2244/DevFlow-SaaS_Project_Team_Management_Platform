@@ -181,6 +181,66 @@ async function removeLabel(taskId, labelId, userId) {
   await prisma.taskLabel.delete({ where: { id: labelId } });
 }
 
+// Returns tasks with a dueDate falling inside the given calendar month,
+// across every project in the organization — this is what powers the
+// "click a date, see what's due" calendar view.
+async function getTasksForCalendar(organizationId, userId, month) {
+  await assertOrgMembership(organizationId, userId);
+
+  const [year, monthNum] = month.split("-").map(Number);
+  const startOfMonth = new Date(Date.UTC(year, monthNum - 1, 1));
+  const startOfNextMonth = new Date(Date.UTC(year, monthNum, 1));
+
+  const projectIds = (
+    await prisma.project.findMany({ where: { organizationId }, select: { id: true } })
+  ).map((p) => p.id);
+
+  return prisma.task.findMany({
+    where: {
+      projectId: { in: projectIds },
+      dueDate: { gte: startOfMonth, lt: startOfNextMonth },
+    },
+    include: {
+      ...TASK_INCLUDE,
+      project: { select: { id: true, name: true } },
+    },
+    orderBy: { dueDate: "asc" },
+  });
+}
+
+// Org-wide search/filter — same filter shape as listTasks, but scoped
+// to an organization rather than a single project. This is what a
+// top-level search bar ("all High Priority tasks assigned to Ali")
+// needs, since that kind of query doesn't make sense pinned to one project.
+async function searchTasks(organizationId, userId, { status, priority, assigneeId, label, search }) {
+  await assertOrgMembership(organizationId, userId);
+
+  const projectIds = (
+    await prisma.project.findMany({ where: { organizationId }, select: { id: true } })
+  ).map((p) => p.id);
+
+  const where = { projectId: { in: projectIds } };
+  if (status) where.status = status;
+  if (priority) where.priority = priority;
+  if (assigneeId) where.assigneeId = assigneeId;
+  if (label) where.labels = { some: { name: label } };
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  return prisma.task.findMany({
+    where,
+    include: {
+      ...TASK_INCLUDE,
+      project: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 module.exports = {
   createTask,
   listTasks,
@@ -190,4 +250,6 @@ module.exports = {
   deleteTask,
   addLabel,
   removeLabel,
+  getTasksForCalendar,
+  searchTasks,
 };

@@ -42,6 +42,18 @@ const removeLabel = asyncHandler(async (req, res) => {
   new ApiResponse(200, null, "Label removed").send(res);
 });
 
+const getCalendarTasks = asyncHandler(async (req, res) => {
+  const { organizationId, month } = req.query;
+  const tasks = await service.getTasksForCalendar(organizationId, req.user.id, month);
+  new ApiResponse(200, { tasks }, "Calendar tasks fetched").send(res);
+});
+
+const searchTasks = asyncHandler(async (req, res) => {
+  const { organizationId, ...filters } = req.query;
+  const tasks = await service.searchTasks(organizationId, req.user.id, filters);
+  new ApiResponse(200, { tasks }, "Search results fetched").send(res);
+});
+
 module.exports = {
   createTask,
   listTasks,
@@ -51,4 +63,6 @@ module.exports = {
   deleteTask,
   addLabel,
   removeLabel,
+  getCalendarTasks,
+  searchTasks,
 };

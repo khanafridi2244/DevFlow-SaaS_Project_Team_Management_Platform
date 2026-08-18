@@ -10,6 +10,8 @@ const {
   listTasksQuerySchema,
   addLabelSchema,
   removeLabelSchema,
+  calendarQuerySchema,
+  searchTasksQuerySchema,
 } = require("./task.validation");
 
 const router = Router();
@@ -18,6 +20,9 @@ router.use(verifyJWT);
 
 router.post("/", validate(createTaskSchema), controller.createTask);
 router.get("/", validate(listTasksQuerySchema), controller.listTasks);
+
+router.get("/calendar", validate(calendarQuerySchema), controller.getCalendarTasks);
+router.get("/search", validate(searchTasksQuerySchema), controller.searchTasks);
 
 router.get("/:taskId", validate(taskIdParamSchema), controller.getTask);
 router.patch("/:taskId", validate(updateTaskSchema), controller.updateTask);
