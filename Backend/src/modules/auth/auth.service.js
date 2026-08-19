@@ -3,6 +3,7 @@ const { prisma } = require("../../config/prisma");
 const { hashPassword, comparePassword } = require("../../utils/password");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../../utils/jwt");
 const { ApiError } = require("../../utils/apiError");
+const { sendEmail } = require("../../config/email");
 
 const PUBLIC_USER_FIELDS = {
   id: true,
@@ -45,6 +46,16 @@ async function register({ email, password, firstName, lastName }) {
       emailVerifyExpiry,
     },
     select: PUBLIC_USER_FIELDS,
+  });
+
+
+  await sendEmail({
+    to: email,
+    subject: "Verify your DevFlow account",
+    html: `<p>Hi ${firstName},</p>
+      <p>Welcome to DevFlow. Verify your email using this code:</p>
+      <p style="font-size:20px;font-weight:bold;">${emailVerifyToken}</p>
+      <p>This code expires in 24 hours.</p>`,
   });
 
   const tokens = issueTokens(user);
@@ -136,6 +147,16 @@ async function forgotPassword(email) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return;
+
+      await sendEmail({
+     to: email,
+    subject: "Reset your DevFlow password",
+    html: `<p>Hi ${user.firstName},</p>
+      <p>Use this code to reset your password:</p>
+      <p style="font-size:20px;font-weight:bold;">${resetToken}</p>
+      <p>This code expires in 1 hour. If you didn't request this, you can ignore this email.</p>`,
+  });
+
   }
 
   const resetToken = generateToken();
