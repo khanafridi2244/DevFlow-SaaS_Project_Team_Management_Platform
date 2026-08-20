@@ -46,6 +46,11 @@ const env = {
     from: process.env.EMAIL_FROM ?? "DevFlow <no-reply@devflow.app>",
   },
 
+    anthropic: {
+    apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+    model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5",
+  },
+
   isProduction: process.env.NODE_ENV === "production",
 };
 
