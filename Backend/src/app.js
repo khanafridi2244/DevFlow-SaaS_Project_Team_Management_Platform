@@ -2,7 +2,7 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const morgan = require("morgan");
+const { requestLogger } = require("./middleware/requestLogger.middleware");
 const rateLimit = require("express-rate-limit");
 
 const { env } = require("./config/env");
@@ -36,9 +36,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
-if (!env.isProduction) {
-  app.use(morgan("dev"));
-}
+app.use(requestLogger);
 
 // ── Rate limiting ───────────────────────────────────────
 // Tighter limit on auth routes specifically — these are the ones

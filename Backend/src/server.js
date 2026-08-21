@@ -4,30 +4,29 @@ const { env } = require("./config/env");
 const { prisma } = require("./config/prisma");
 const { initSocket } = require("./config/socket");
 const { connectRedis, redisClient } = require("./config/redis");
+const { logger } = require("./config/logger");
 
 const httpServer = http.createServer(app);
 initSocket(httpServer);
 
 async function start() {
-  // Redis is optional — if it fails to connect, log it and keep going.
-  // The app should still boot and serve requests without caching.
   try {
     await connectRedis();
   } catch (err) {
-    console.error("⚠️  Redis unavailable, continuing without caching:", err.message);
+    logger.warn("Redis unavailable, continuing without caching", { error: err.message });
   }
 
   const server = httpServer.listen(env.port, () => {
-    console.log(`✅ DevFlow API running on http://localhost:${env.port} [${env.nodeEnv}]`);
-    console.log(`✅ Socket.IO listening for real-time connections`);
+    logger.info(`DevFlow API running on port ${env.port}`, { env: env.nodeEnv });
+    logger.info("Socket.IO listening for real-time connections");
   });
 
   async function shutdown(signal) {
-    console.log(`\n${signal} received. Shutting down gracefully...`);
+    logger.info(`${signal} received, shutting down gracefully`);
     server.close(async () => {
       await prisma.$disconnect();
       if (redisClient.isOpen) await redisClient.quit();
-      console.log("Server closed, DB and Redis disconnected.");
+      logger.info("Server closed, DB and Redis disconnected");
       process.exit(0);
     });
 
@@ -39,7 +38,7 @@ async function start() {
 }
 
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
+  logger.error("Unhandled Rejection", { reason: String(reason) });
 });
 
 start();
