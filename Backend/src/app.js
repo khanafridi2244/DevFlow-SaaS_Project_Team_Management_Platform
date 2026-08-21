@@ -19,7 +19,7 @@ const notificationRoutes = require("./modules/notifications/notification.routes"
 const attachmentRoutes = require("./modules/attachments/attachment.routes");
 const analyticsRoutes = require("./modules/analytics/analytics.routes");
 const subscriptionRoutes = require("./modules/subscriptions/subscription.routes");
-
+const aiRoutes = require("./modules/ai/ai.routes");
 
 
 const app = express();
@@ -78,6 +78,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/attachments", attachmentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/ai", aiRoutes);
 
 
 // ── 404 handler ─────────────────────────────────────────
