@@ -1,5 +1,6 @@
 const { ApiError } = require("../utils/apiError");
 const { env } = require("../config/env");
+const { logger } = require("../config/logger");
 
 // Handles Prisma's known error codes so DB errors don't leak as raw 500s
 function handlePrismaError(err) {
@@ -30,7 +31,7 @@ function errorMiddleware(err, req, res, next) {
 
   if (!isOperational) {
     // Unexpected bug — log full detail server-side regardless of env
-    console.error("UNEXPECTED ERROR:", err);
+    logger.error("UNEXPECTED ERROR", { message: err.message, stack: err.stack });
   }
 
   res.status(statusCode).json({
