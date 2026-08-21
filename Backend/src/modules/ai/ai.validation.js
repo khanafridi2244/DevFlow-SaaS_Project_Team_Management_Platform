@@ -1,31 +1,52 @@
-const Joi = require("joi");
+const { z } = require("zod");
 
-const generateProjectPlanSchema = Joi.object({
-  description: Joi.string().trim().min(10).max(5000).required(),
+const generatePlanSchema = z.object({
+  body: z.object({
+    organizationId: z.string().min(1, "organizationId is required"),
+    description: z.string().min(5, "Description must be at least 5 characters").max(1000),
+  }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
 });
 
-const generateTasksSchema = Joi.object({
-  projectId: Joi.string().required(),
-  instruction: Joi.string().trim().min(5).max(3000).required(),
+const generateTasksSchema = z.object({
+  body: z.object({
+    projectId: z.string().min(1, "projectId is required"),
+    instruction: z.string().min(5, "Instruction must be at least 5 characters").max(500),
+  }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
 });
 
-const generateTaskDescriptionSchema = Joi.object({
-  title: Joi.string().trim().min(3).max(300).required(),
-  projectContext: Joi.string().trim().max(3000).allow("", null),
+const summarizeTaskSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({
+    taskId: z.string().min(1, "taskId is required"),
+  }),
+  query: z.object({}).optional(),
 });
 
-const taskIdParamSchema = Joi.object({
-  taskId: Joi.string().required(),
+const generateDescriptionSchema = z.object({
+  body: z.object({
+    title: z.string().min(2, "Title is required").max(200),
+    projectContext: z.string().max(500).optional(),
+  }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
 });
 
-const projectIdParamSchema = Joi.object({
-  projectId: Joi.string().required(),
+const analyzeRiskSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({
+    projectId: z.string().min(1, "projectId is required"),
+  }),
+  query: z.object({}).optional(),
 });
 
 module.exports = {
-  generateProjectPlanSchema,
+  generatePlanSchema,
   generateTasksSchema,
-  generateTaskDescriptionSchema,
-  taskIdParamSchema,
-  projectIdParamSchema,
+  summarizeTaskSchema,
+  generateDescriptionSchema,
+  analyzeRiskSchema,
 };

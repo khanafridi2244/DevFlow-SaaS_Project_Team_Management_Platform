@@ -1,96 +1,43 @@
-const express = require("express");
-
-const router = express.Router();
-
-const aiController = require("./ai.controller");
+const { Router } = require("express");
+const rateLimit = require("express-rate-limit");
+const controller = require("./ai.controller");
+const { validate } = require("../../middleware/validate.middleware");
+const { verifyJWT } = require("../../middleware/auth.middleware");
+const { env } = require("../../config/env");
 const {
-  generateProjectPlanSchema,
+  generatePlanSchema,
   generateTasksSchema,
-  generateTaskDescriptionSchema,
-  taskIdParamSchema,
-  projectIdParamSchema,
+  summarizeTaskSchema,
+  generateDescriptionSchema,
+  analyzeRiskSchema,
 } = require("./ai.validation");
 
-const { authenticate } = require("../../middlewares/auth.middleware");
+const router = Router();
 
-function validateBody(schema) {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
+router.use(verifyJWT);
 
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation error",
-        errors: error.details.map((detail) => detail.message),
-      });
-    }
+// AI calls cost real money per request — a much tighter limit than the
+// rest of the API, so one user can't rack up a huge Anthropic bill by
+// spamming these endpoints (accidentally or otherwise).
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => env.nodeEnv === "test",
+  message: { success: false, message: "AI request limit reached, please try again later" },
+});
 
-    req.body = value;
-    next();
-  };
-}
+router.use(aiLimiter);
 
-function validateParams(schema) {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req.params, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation error",
-        errors: error.details.map((detail) => detail.message),
-      });
-    }
-
-    req.params = value;
-    next();
-  };
-};
-
-// Generate a complete project plan
+router.post("/generate-plan", validate(generatePlanSchema), controller.generatePlan);
+router.post("/generate-tasks", validate(generateTasksSchema), controller.generateTasks);
+router.get("/tasks/:taskId/summarize", validate(summarizeTaskSchema), controller.summarizeTask);
 router.post(
-  "/project-plan",
-  authenticate,
-  validateBody(generateProjectPlanSchema),
-  aiController.generateProjectPlan
+  "/generate-description",
+  validate(generateDescriptionSchema),
+  controller.generateDescription
 );
-
-// Generate tasks for a project
-router.post(
-  "/tasks",
-  authenticate,
-  validateBody(generateTasksSchema),
-  aiController.generateTasks
-);
-
-// Generate a technical task description
-router.post(
-  "/task-description",
-  authenticate,
-  validateBody(generateTaskDescriptionSchema),
-  aiController.generateTaskDescription
-);
-
-// Summarize task discussion
-router.get(
-  "/tasks/:taskId/summary",
-  authenticate,
-  validateParams(taskIdParamSchema),
-  aiController.summarizeTaskDiscussion
-);
-
-// Analyze project risks
-router.get(
-  "/projects/:projectId/risk",
-  authenticate,
-  validateParams(projectIdParamSchema),
-  aiController.analyzeProjectRisk
-);
+router.get("/projects/:projectId/risk", validate(analyzeRiskSchema), controller.analyzeRisk);
 
 module.exports = router;
