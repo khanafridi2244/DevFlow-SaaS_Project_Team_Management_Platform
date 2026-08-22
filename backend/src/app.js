@@ -9,6 +9,8 @@ const { env } = require("./config/env");
 const { errorMiddleware } = require("./middleware/error.middleware");
 const { ApiError } = require("./utils/apiError");
 
+const { prisma } = require("./config/prisma");
+
 const authRoutes = require("./modules/auth/auth.routes");
 const organizationRoutes = require("./modules/organizations/organization.routes");
 const projectRoutes = require("./modules/projects/project.routes");
@@ -66,10 +68,20 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // ── Health check ────────────────────────────────────────
-app.get("/health", (req, res) => {
-  res.status(200).json({ success: true, message: "DevFlow API is running" });
+// A load balancer or uptime monitor hitting /health wants to know the
+// app can actually serve requests, not just that the Node process
+// hasn't crashed — so this checks the database connection too.
+// Redis is deliberately NOT checked here: the app degrades gracefully
+// without it (see config/redis.js), so Redis being down shouldn't mark
+// the whole service unhealthy.
+app.get("/health", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ success: true, message: "DevFlow API is running", database: "connected" });
+  } catch (err) {
+    res.status(503).json({ success: false, message: "Database unreachable", database: "disconnected" });
+  }
 });
-
 // ── Routes ───────────────────────────────────────────────
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/organizations", organizationRoutes);

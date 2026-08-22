@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: devflow-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci && npx prisma generate
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: devflow-postgres
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false
+
+databases:
+  - name: devflow-postgres
+    plan: free
