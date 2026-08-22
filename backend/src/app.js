@@ -25,7 +25,12 @@ const aiRoutes = require("./modules/ai/ai.routes");
 const app = express();
 
 // ── Security & parsing ─────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: env.isProduction ? undefined : false, // relaxed in dev so tools like Postman/browser devtools aren't blocked
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // allows the frontend (different origin) to load uploaded images/attachments
+  })
+);
 app.use(
   cors({
     origin: env.clientUrl,

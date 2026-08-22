@@ -54,4 +54,22 @@ const env = {
   isProduction: process.env.NODE_ENV === "production",
 };
 
+// Guards against accidentally deploying with a placeholder secret still
+// in place — the .env.example file ships with a literal string like
+// "replace_with_a_long_random_secret", and it's a real, easy mistake to
+// copy .env.example to .env and forget to actually replace that value.
+if (env.isProduction) {
+  const placeholderPatterns = ["replace_with", "changeme", "your_secret_here"];
+  const secretsToCheck = { JWT_ACCESS_SECRET: env.jwt.accessSecret, JWT_REFRESH_SECRET: env.jwt.refreshSecret };
+
+  for (const [name, value] of Object.entries(secretsToCheck)) {
+    if (placeholderPatterns.some((p) => value.toLowerCase().includes(p))) {
+      throw new Error(
+        `${name} still contains a placeholder value. Generate a real secret with: openssl rand -base64 64`
+      );
+    }
+  }
+}
+
+
 module.exports = { env };
