@@ -1,17 +1,26 @@
 const { createClient } = require("redis");
 const { env } = require("./env");
 
-const redisClient = createClient({ url: env.redisUrl });
+const redisClient = createClient({
+  url: env.redisUrl,
+  socket: {
+    reconnectStrategy: (retries) => {
+      if (retries > 3) return false; // stop retrying after 3 attempts
+      return Math.min(retries * 200, 1000);
+    },
+  },
+});
 
+let hasLoggedError = false;
 redisClient.on("error", (err) => {
-  console.error("Redis Client Error:", err.message);
+  if (!hasLoggedError) {
+    console.error("Redis unavailable, continuing without caching:", err.message);
+    hasLoggedError = true;
+  }
 });
 
 let isConnected = false;
 
-// Lazily connects on first use rather than at module-load time — this
-// matters for tests, which never call connectRedis() and shouldn't need
-// a running Redis instance just to import this file.
 async function connectRedis() {
   if (isConnected) return;
   await redisClient.connect();
@@ -19,15 +28,8 @@ async function connectRedis() {
   console.log("✅ Redis connected");
 }
 
-// Cache helper: tries Redis first, falls back to computing fresh and
-// storing the result if it's a cache miss (or Redis is unreachable).
-// This wraps the "check cache, else run query, then cache it" pattern
-// so callers don't repeat that logic everywhere.
 async function cached(key, ttlSeconds, computeFn) {
   if (!isConnected) {
-    // Redis not available (e.g. not configured, or down) — just compute
-    // directly. Caching is a performance optimization, not a dependency
-    // the app should break without.
     return computeFn();
   }
 
@@ -52,9 +54,6 @@ async function cached(key, ttlSeconds, computeFn) {
   return fresh;
 }
 
-// Deletes all keys matching a prefix — used to invalidate an
-// organization's cached analytics whenever its underlying data changes
-// (a task is created, completed, etc).
 async function invalidatePrefix(prefix) {
   if (!isConnected) return;
   try {
@@ -67,9 +66,4 @@ async function invalidatePrefix(prefix) {
   }
 }
 
-module.exports = { 
-    redisClient,
-    connectRedis,
-    cached, 
-    invalidatePrefix
-};
+module.exports = { redisClient, connectRedis, cached, invalidatePrefix };
