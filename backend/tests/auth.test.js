@@ -63,6 +63,15 @@ describe("Auth flow", () => {
       expect(res.status).toBe(200);
       expect(res.body.data.user.email).toBe(testUser.email);
       expect(res.headers["set-cookie"]).toBeDefined();
+
+      // Guards against the exact bug this test suite missed before:
+      // login must never leak passwordHash or verification/reset tokens.
+      expect(res.body.data.user).not.toHaveProperty("passwordHash");
+      expect(res.body.data.user).not.toHaveProperty("refreshTokenHash");
+      expect(res.body.data.user).not.toHaveProperty("emailVerifyToken");
+      expect(res.body.data.user).not.toHaveProperty("emailVerifyExpiry");
+      expect(res.body.data.user).not.toHaveProperty("resetToken");
+      expect(res.body.data.user).not.toHaveProperty("resetTokenExpiry");
     });
 
     it("rejects an incorrect password", async () => {

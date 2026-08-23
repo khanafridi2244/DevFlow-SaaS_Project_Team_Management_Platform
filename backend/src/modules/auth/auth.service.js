@@ -65,6 +65,9 @@ async function register({ email, password, firstName, lastName }) {
 }
 
 async function login({ email, password }) {
+  // Need passwordHash to verify the password, but must never let it
+  // (or the other sensitive token fields) reach the response — so
+  // fetch it separately here rather than trying to select it out later.
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     throw ApiError.unauthorized("Invalid email or password");
@@ -78,16 +81,16 @@ async function login({ email, password }) {
   const tokens = issueTokens(user);
   await persistRefreshToken(user.id, tokens.refreshToken);
 
-  const { passwordHash, refreshTokenHash, ...publicUser } = user;
-  return { user: publicUser, ...tokens };
-}
-
-async function persistRefreshToken(userId, refreshToken) {
-  const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
-  await prisma.user.update({
-    where: { id: userId },
-    data: { refreshTokenHash },
+  // Re-fetch with an explicit safe select, same pattern as register() —
+  // this makes it structurally impossible to accidentally leak a new
+  // sensitive field added to the User model in the future, since only
+  // fields explicitly listed here ever get returned.
+  const publicUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: PUBLIC_USER_FIELDS,
   });
+
+  return { user: publicUser, ...tokens };
 }
 
 async function refreshSession(refreshToken) {
