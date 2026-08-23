@@ -26,6 +26,14 @@ function issueTokens(user) {
   return { accessToken, refreshToken };
 }
 
+async function persistRefreshToken(userId, refreshToken) {
+  const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+  await prisma.user.update({
+    where: { id: userId },
+    data: { refreshTokenHash },
+  });
+}
+
 async function register({ email, password, firstName, lastName }) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -34,7 +42,7 @@ async function register({ email, password, firstName, lastName }) {
 
   const passwordHash = await hashPassword(password);
   const emailVerifyToken = generateToken();
-  const emailVerifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+  const emailVerifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const user = await prisma.user.create({
     data: {
@@ -47,7 +55,6 @@ async function register({ email, password, firstName, lastName }) {
     },
     select: PUBLIC_USER_FIELDS,
   });
-
 
   await sendEmail({
     to: email,
@@ -65,9 +72,6 @@ async function register({ email, password, firstName, lastName }) {
 }
 
 async function login({ email, password }) {
-  // Need passwordHash to verify the password, but must never let it
-  // (or the other sensitive token fields) reach the response — so
-  // fetch it separately here rather than trying to select it out later.
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     throw ApiError.unauthorized("Invalid email or password");
@@ -81,10 +85,6 @@ async function login({ email, password }) {
   const tokens = issueTokens(user);
   await persistRefreshToken(user.id, tokens.refreshToken);
 
-  // Re-fetch with an explicit safe select, same pattern as register() —
-  // this makes it structurally impossible to accidentally leak a new
-  // sensitive field added to the User model in the future, since only
-  // fields explicitly listed here ever get returned.
   const publicUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: PUBLIC_USER_FIELDS,
@@ -150,24 +150,23 @@ async function forgotPassword(email) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     return;
+  }
 
-      await sendEmail({
-     to: email,
+  const resetToken = generateToken();
+  const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { resetToken, resetTokenExpiry },
+  });
+
+  await sendEmail({
+    to: email,
     subject: "Reset your DevFlow password",
     html: `<p>Hi ${user.firstName},</p>
       <p>Use this code to reset your password:</p>
       <p style="font-size:20px;font-weight:bold;">${resetToken}</p>
       <p>This code expires in 1 hour. If you didn't request this, you can ignore this email.</p>`,
-  });
-
-  }
-
-  const resetToken = generateToken();
-  const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1h
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { resetToken, resetTokenExpiry },
   });
 }
 
