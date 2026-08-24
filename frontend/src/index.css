@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* CSS custom properties mirror the Tailwind config values, so
+       non-Tailwind contexts (inline SVG fills, chart libraries that
+       need raw hex/CSS values, etc.) can reference the same design
+       tokens without duplicating hex codes in multiple places. */
+    --color-ink: #0e1116;
+    --color-paper: #f7f7f5;
+    --color-signal: #4f7cff;
+    --color-done: #3fb68b;
+    --color-warn: #e6a23c;
+    --color-line: #2a2e37;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  body {
+    font-feature-settings: "cv11", "ss01"; /* Inter's stylistic sets — slightly more distinctive numerals/letterforms than default */
+  }
+
+  /* Respects the user's OS-level motion preference — required for
+     the "purposeful only" motion principle from the design plan,
+     not optional polish. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Monospace tabular numerals for anything showing counts/timestamps
+     side by side (dashboard stat cards, activity feed) — prevents
+     digits from jittering in width as values change. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
