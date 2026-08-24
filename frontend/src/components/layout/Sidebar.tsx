@@ -3,7 +3,7 @@ import { LayoutDashboard, FolderKanban, Calendar, Search, LogOut } from "lucide-
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
-import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher.tsx";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
