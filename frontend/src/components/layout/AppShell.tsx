@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
+import { NotificationBell } from "./NotificationBell";
 import { getMyOrganizations } from "@/lib/workspace";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 
@@ -20,9 +21,14 @@ export function AppShell() {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        <Outlet />
-      </main>
+      <div className="flex-1">
+        <header className="flex h-14 items-center justify-end border-b border-line px-4">
+          <NotificationBell />
+        </header>
+        <main className="overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
