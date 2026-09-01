@@ -21,6 +21,7 @@ interface TaskCardProps {
   task: Task;
   isDragging?: boolean;
   onDragStart: (e: React.DragEvent, taskId: string) => void;
+  onClick: () => void;
 }
 
 // This is the signature element from the design plan: a colored rail
@@ -28,13 +29,14 @@ interface TaskCardProps {
 // git-diff gutter or CI status strip. The rail color transitions
 // smoothly (via layout + the color change itself) when status changes,
 // rather than the whole card re-styling.
-export function TaskCard({ task, isDragging, onDragStart }: TaskCardProps) {
+export function TaskCard({ task, isDragging, onDragStart, onClick }: TaskCardProps) {
   return (
     <motion.div
       layout
       layoutId={task.id}
       draggable
       onDragStart={(e) => onDragStart(e as unknown as React.DragEvent, task.id)}
+      onClick={onClick}
       className={cn(
         "group relative cursor-grab overflow-hidden rounded border border-line bg-white/[0.02] pl-3 pr-3 py-2.5 active:cursor-grabbing",
         isDragging && "opacity-40"

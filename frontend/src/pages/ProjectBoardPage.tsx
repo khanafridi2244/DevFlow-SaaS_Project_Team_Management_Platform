@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listTasks, updateTaskStatus, TaskStatus } from "@/lib/tasks";
 import { getProject } from "@/lib/projects";
 import { BoardColumn } from "@/components/board/BoardColumn";
+import { TaskDetailModal } from "@/components/task/TaskDetailModal";
 
 const COLUMNS: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"];
 
@@ -11,6 +12,7 @@ export default function ProjectBoardPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const queryClient = useQueryClient();
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { data: project } = useQuery({
     queryKey: ["project", projectId],
@@ -27,11 +29,6 @@ export default function ProjectBoardPage() {
   const statusMutation = useMutation({
     mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
       updateTaskStatus(taskId, status),
-    // Optimistic update: the card visually moves to its new column
-    // immediately on drop, rather than waiting for the round-trip to
-    // the server — matches the instant feel a real Kanban board needs.
-    // If the request fails, React Query's onError rolls the cache
-    // back to the snapshot taken here.
     onMutate: async ({ taskId, status }) => {
       await queryClient.cancelQueries({ queryKey: ["tasks", projectId] });
       const previous = queryClient.getQueryData(["tasks", projectId]);
@@ -78,9 +75,12 @@ export default function ProjectBoardPage() {
             draggedTaskId={draggedTaskId}
             onDragStart={handleDragStart}
             onDrop={handleDrop}
+            onTaskClick={setSelectedTaskId}
           />
         ))}
       </div>
+
+      <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />
     </div>
   );
 }

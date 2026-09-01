@@ -22,9 +22,17 @@ interface BoardColumnProps {
   draggedTaskId: string | null;
   onDragStart: (e: React.DragEvent, taskId: string) => void;
   onDrop: (status: TaskStatus) => void;
+  onTaskClick: (taskId: string) => void;
 }
 
-export function BoardColumn({ status, tasks, draggedTaskId, onDragStart, onDrop }: BoardColumnProps) {
+export function BoardColumn({
+  status,
+  tasks,
+  draggedTaskId,
+  onDragStart,
+  onDrop,
+  onTaskClick,
+}: BoardColumnProps) {
   return (
     <div
       onDragOver={(e) => e.preventDefault()}
@@ -44,6 +52,7 @@ export function BoardColumn({ status, tasks, draggedTaskId, onDragStart, onDrop 
             task={task}
             isDragging={draggedTaskId === task.id}
             onDragStart={onDragStart}
+            onClick={() => onTaskClick(task.id)}
           />
         ))}
       </div>
