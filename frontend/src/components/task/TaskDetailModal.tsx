@@ -3,6 +3,7 @@ import { getTask } from "@/lib/tasks";
 import { Dialog } from "@/components/ui/Dialog";
 import { CommentThread } from "./CommentThread";
 import { AttachmentList } from "./AttachmentList";
+import { SummarizeButton } from "./SummarizeButton";
 import { cn } from "@/lib/utils";
 
 const RAIL_COLORS: Record<string, string> = {
@@ -39,6 +40,7 @@ export function TaskDetailModal({ taskId, onClose }: TaskDetailModalProps) {
 
           <AttachmentList taskId={task.id} />
           <CommentThread taskId={task.id} />
+          <SummarizeButton taskId={task.id} />
         </div>
       )}
     </Dialog>

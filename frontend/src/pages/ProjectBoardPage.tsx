@@ -5,6 +5,7 @@ import { listTasks, updateTaskStatus, TaskStatus } from "@/lib/tasks";
 import { getProject } from "@/lib/projects";
 import { BoardColumn } from "@/components/board/BoardColumn";
 import { TaskDetailModal } from "@/components/task/TaskDetailModal";
+import { RiskPanel } from "@/components/project/RiskPanel";
 
 const COLUMNS: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"];
 
@@ -63,9 +64,13 @@ export default function ProjectBoardPage() {
 
   return (
     <div className="flex h-full flex-col p-6">
-      <h1 className="text-lg font-semibold text-paper">{project?.name ?? "Loading..."}</h1>
-      <p className="mt-1 text-sm text-paper/50">{project?.description}</p>
-
+       <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-paper">{project?.name ?? "Loading..."}</h1>
+          <p className="mt-1 text-sm text-paper/50">{project?.description}</p>
+        </div>
+        {projectId && <RiskPanel projectId={projectId} />}
+       </div>
       <div className="mt-6 flex flex-1 gap-4 overflow-x-auto pb-4">
         {COLUMNS.map((status) => (
           <BoardColumn
