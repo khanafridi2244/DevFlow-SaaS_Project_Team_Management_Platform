@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Sparkles } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { listProjects, createProject } from "@/lib/projects";
-import { ProjectCard } from "@/components/projects/ProjectCard";
+import { ProjectCard } from "@/components/project/ProjectCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Dialog } from "@/components/ui/Dialog";
