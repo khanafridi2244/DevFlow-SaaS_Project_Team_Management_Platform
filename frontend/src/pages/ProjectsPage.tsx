@@ -13,6 +13,7 @@ export default function ProjectsPage() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [name, setName] = useState("");
+  const [formError, setFormError] = useState("");
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ["projects", activeOrgId],
@@ -26,12 +27,20 @@ export default function ProjectsPage() {
       queryClient.invalidateQueries({ queryKey: ["projects", activeOrgId] });
       setIsDialogOpen(false);
       setName("");
+      setFormError("");
     },
   });
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!activeOrgId || !name.trim()) return;
+    setFormError("");
+
+    if (!activeOrgId) {
+      setFormError("Select or create a workspace first, using the switcher in the sidebar.");
+      return;
+    }
+    if (!name.trim()) return;
+
     createMutation.mutate({ organizationId: activeOrgId, name: name.trim() });
   }
 
@@ -72,6 +81,11 @@ export default function ProjectsPage() {
             autoFocus
             required
           />
+          {formError && (
+            <p className="rounded border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+              {formError}
+            </p>
+          )}
           <Button type="submit" className="w-full" isLoading={createMutation.isPending}>
             Create project
           </Button>
