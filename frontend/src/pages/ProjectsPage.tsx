@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { listProjects, createProject } from "@/lib/projects";
-import { ProjectCard } from "@/components/project/ProjectCard";
+import { ProjectCard } from "@/components/projects/ProjectCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Dialog } from "@/components/ui/Dialog";
+import { GeneratePlanDialog } from "@/components/ai/GeneratePlanDialog";
 
 export default function ProjectsPage() {
   const activeOrgId = useWorkspaceStore((s) => s.activeOrgId);
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [formError, setFormError] = useState("");
 
@@ -51,10 +53,16 @@ export default function ProjectsPage() {
           <h1 className="text-lg font-semibold text-paper">Projects</h1>
           <p className="mt-1 text-sm text-paper/50">Everything your team is building.</p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="h-4 w-4" />
-          New project
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setIsAiDialogOpen(true)}>
+            <Sparkles className="h-4 w-4" />
+            Generate with AI
+          </Button>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            New project
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -91,6 +99,8 @@ export default function ProjectsPage() {
           </Button>
         </form>
       </Dialog>
+
+      <GeneratePlanDialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen} />
     </div>
   );
 }
