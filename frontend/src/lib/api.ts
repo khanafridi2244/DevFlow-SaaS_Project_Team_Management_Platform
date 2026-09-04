@@ -31,7 +31,17 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Never attempt a token refresh in response to a failed login,
+    // register, or refresh call itself — a 401 from these endpoints
+    // means the credentials/token are genuinely invalid, not that a
+    // valid session's access token merely expired. Retrying a refresh
+    // here just masks the real error message with a second, unrelated
+    // 401 from the refresh endpoint.
+    const isAuthEndpoint = ["/auth/login", "/auth/register", "/auth/refresh"].some((path) =>
+      originalRequest.url?.includes(path)
+    );
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         // Another request already triggered a refresh — wait for it
         // instead of firing a second, redundant refresh call.
