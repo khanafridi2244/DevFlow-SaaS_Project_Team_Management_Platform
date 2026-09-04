@@ -12,6 +12,7 @@ import SearchPage from "@/pages/SearchPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import MembersPage from "@/pages/MembersPage";
 import ActivityPage from "@/pages/ActivityPage";
+import BillingPage from "@/pages/BillingPage";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/members" element={<MembersPage />} />
         <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/billing" element={<BillingPage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
