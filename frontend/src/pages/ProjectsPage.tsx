@@ -48,7 +48,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold text-paper">Projects</h1>
           <p className="mt-1 text-sm text-paper/50">Everything your team is building.</p>
@@ -72,7 +72,7 @@ export default function ProjectsPage() {
           No projects yet. Create one to get started.
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-3 gap-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects?.map((project, i) => (
             <ProjectCard key={project.id} project={project} delay={i * 0.03} />
           ))}

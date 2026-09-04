@@ -61,7 +61,7 @@ export default function BillingPage() {
         </p>
       )}
 
-      <div className="mt-6 grid grid-cols-3 gap-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {PLANS.map((plan) => (
           <PlanCard
             key={plan}
