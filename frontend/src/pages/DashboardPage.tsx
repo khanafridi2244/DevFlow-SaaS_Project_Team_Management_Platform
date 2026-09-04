@@ -40,7 +40,7 @@ export default function DashboardPage() {
       <h1 className="text-lg font-semibold text-paper">Dashboard</h1>
       <p className="mt-1 text-sm text-paper/50">An overview of what's happening across your workspace.</p>
 
-      <div className="mt-6 grid grid-cols-4 gap-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard label="Total tasks" value={overview?.totalTasks ?? 0} icon={Circle} delay={0} />
         <StatCard
           label="Completed"
@@ -65,7 +65,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         {priority && <PriorityChart data={priority} />}
         {weeklyTrend && <WeeklyTrendChart data={weeklyTrend} />}
       </div>
