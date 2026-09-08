@@ -1,6 +1,7 @@
 const { prisma } = require("../../config/prisma");
 const { ApiError } = require("../../utils/apiError");
 const { assertCanCreateProject } = require("../subscriptions/subscription.service");
+const { logActivity } = require("../activities/activity.service");
 
 const PROJECT_MEMBER_SELECT = {
   id: true,
@@ -45,6 +46,14 @@ async function createProject(userId, { organizationId, name, description, startD
     });
 
     return created;
+  });
+
+  await logActivity({
+    organizationId,
+    projectId: project.id,
+    actorId: userId,
+    action: "PROJECT_CREATED",
+    metadata: { projectName: project.name },
   });
 
   return project;

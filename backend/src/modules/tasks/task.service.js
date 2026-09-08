@@ -4,6 +4,7 @@ const { assertOrgMembership } = require("../projects/project.service");
 const { invalidateAnalyticsCache } = require("../analytics/analytics.service");
 const { assertCanCreateTask } = require("../subscriptions/subscription.service");
 
+const { logActivity } = require("../activities/activity.service");
 const USER_SELECT = {
   id: true,
   email: true,
@@ -72,6 +73,14 @@ async function createTask(userId, { projectId, title, description, priority, ass
   });
 
   await invalidateAnalyticsCache(project.organizationId);
+
+  await logActivity({
+    organizationId: project.organizationId,
+    projectId: project.id,
+    actorId: userId,
+    action: "TASK_CREATED",
+    metadata: { taskId: task.id, taskTitle: task.title },
+  });
 
   return task;
 }
@@ -151,6 +160,14 @@ async function updateTaskStatus(taskId, userId, status) {
   });
 
   await invalidateAnalyticsCache(task.project.organizationId);
+
+  await logActivity({
+    organizationId: task.project.organizationId,
+    projectId: task.projectId,
+    actorId: userId,
+    action: "TASK_STATUS_CHANGED",
+    metadata: { taskId: task.id, taskTitle: task.title, fromStatus: task.status, toStatus: status },
+  });
 
   return updated;
 }

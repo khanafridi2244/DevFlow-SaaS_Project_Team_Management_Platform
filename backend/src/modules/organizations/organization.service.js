@@ -2,6 +2,7 @@ const { prisma } = require("../../config/prisma");
 const { ApiError } = require("../../utils/apiError");
 const { slugify } = require("./organization.validation");
 const { assertCanAddMember } = require("../subscriptions/subscription.service");
+const { logActivity } = require("../activities/activity.service");
 
 async function generateUniqueSlug(name) {
   const base = slugify(name);
@@ -107,7 +108,7 @@ async function deleteOrganization(organizationId) {
   await prisma.organization.delete({ where: { id: organizationId } });
 }
 
-async function inviteMember(organizationId, { email, role }) {
+async function inviteMember(organizationId, inviterUserId, { email, role }) {
   await assertCanAddMember(organizationId);
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -135,6 +136,13 @@ async function inviteMember(organizationId, { email, role }) {
         select: { id: true, email: true, firstName: true, lastName: true, avatarUrl: true },
       },
     },
+  });
+
+  await logActivity({
+    organizationId,
+    actorId: inviterUserId,
+    action: "MEMBER_INVITED",
+    metadata: { invitedEmail: email, role },
   });
 
   return membership;

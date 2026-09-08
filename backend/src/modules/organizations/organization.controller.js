@@ -28,7 +28,7 @@ const deleteOrganization = asyncHandler(async (req, res) => {
 });
 
 const inviteMember = asyncHandler(async (req, res) => {
-  const membership = await service.inviteMember(req.params.organizationId, req.body);
+  const membership = await service.inviteMember(req.params.organizationId, req.user.id, req.body);
   new ApiResponse(201, { membership }, "Member added successfully").send(res);
 });
 
