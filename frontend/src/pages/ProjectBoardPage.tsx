@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { listTasks, updateTaskStatus, TaskStatus } from "@/lib/tasks";
 import { getProject } from "@/lib/projects";
 import { BoardColumn } from "@/components/board/BoardColumn";
 import { TaskDetailModal } from "@/components/task/TaskDetailModal";
+import { NewTaskDialog } from "@/components/board/NewTaskDialog";
 import { RiskPanel } from "@/components/project/RiskPanel";
+import { Button } from "@/components/ui/Button";
 
 const COLUMNS: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"];
 
@@ -14,6 +17,7 @@ export default function ProjectBoardPage() {
   const queryClient = useQueryClient();
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
 
   const { data: project } = useQuery({
     queryKey: ["project", projectId],
@@ -64,13 +68,20 @@ export default function ProjectBoardPage() {
 
   return (
     <div className="flex h-full flex-col p-6">
-       <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-lg font-semibold text-paper">{project?.name ?? "Loading..."}</h1>
           <p className="mt-1 text-sm text-paper/50">{project?.description}</p>
         </div>
-        {projectId && <RiskPanel projectId={projectId} />}
-       </div>
+        <div className="flex items-center gap-2">
+          {projectId && <RiskPanel projectId={projectId} />}
+          <Button size="sm" onClick={() => setIsNewTaskOpen(true)}>
+            <Plus className="h-4 w-4" />
+            New task
+          </Button>
+        </div>
+      </div>
+
       <div className="mt-6 flex flex-1 gap-4 overflow-x-auto pb-4">
         {COLUMNS.map((status) => (
           <BoardColumn
@@ -86,6 +97,10 @@ export default function ProjectBoardPage() {
       </div>
 
       <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />
+
+      {projectId && (
+        <NewTaskDialog projectId={projectId} open={isNewTaskOpen} onOpenChange={setIsNewTaskOpen} />
+      )}
     </div>
   );
 }
