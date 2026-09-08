@@ -40,3 +40,15 @@ export async function getTask(taskId: string) {
   const res = await api.get<ApiResponse<{ task: Task }>>(`/tasks/${taskId}`);
   return res.data.data.task;
 }
+
+export async function updateTask(
+  taskId: string,
+  payload: Partial<{ title: string; description: string; priority: TaskPriority; assigneeId: string | null; dueDate: string | null }>
+) {
+  const res = await api.patch<ApiResponse<{ task: Task }>>(`/tasks/${taskId}`, payload);
+  return res.data.data.task;
+}
+
+export async function deleteTask(taskId: string) {
+  await api.delete(`/tasks/${taskId}`);
+}

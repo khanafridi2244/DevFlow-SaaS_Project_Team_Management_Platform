@@ -29,3 +29,15 @@ export async function getProject(projectId: string) {
   const res = await api.get<ApiResponse<{ project: Project }>>(`/projects/${projectId}`);
   return res.data.data.project;
 }
+
+export interface ProjectMember {
+  id: string;
+  user: { id: string; firstName: string; lastName: string; avatarUrl: string | null };
+}
+
+export async function getProjectDetail(projectId: string) {
+  const res = await api.get<ApiResponse<{ project: Project & { members: ProjectMember[] } }>>(
+    `/projects/${projectId}`
+  );
+  return res.data.data.project;
+}
