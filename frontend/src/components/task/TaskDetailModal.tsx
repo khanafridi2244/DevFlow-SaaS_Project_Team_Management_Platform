@@ -4,6 +4,9 @@ import { Dialog } from "@/components/ui/Dialog";
 import { CommentThread } from "./CommentThread";
 import { AttachmentList } from "./AttachmentList";
 import { SummarizeButton } from "./SummarizeButton";
+import { AssigneePicker } from "./AssigneePicker";
+import { EditableTaskFields } from "./EditableTaskFields";
+import { DeleteTaskButton } from "./DeleteTaskButton";
 import { cn } from "@/lib/utils";
 
 const RAIL_COLORS: Record<string, string> = {
@@ -26,21 +29,25 @@ export function TaskDetailModal({ taskId, onClose }: TaskDetailModalProps) {
   });
 
   return (
-    <Dialog open={!!taskId} onOpenChange={(open) => !open && onClose()} title={task?.title ?? "Loading..."}>
+    <Dialog open={!!taskId} onOpenChange={(open) => !open && onClose()} title="Task details">
       {task && (
         <div className="max-h-[70vh] space-y-6 overflow-y-auto">
           <div className="flex items-center gap-3">
             <span className={cn("h-2 w-2 rounded-full", RAIL_COLORS[task.status])} />
             <span className="font-mono text-xs text-paper/50">{task.status.replace("_", " ")}</span>
-            <span className="text-paper/20">·</span>
-            <span className="font-mono text-xs text-paper/50">{task.priority}</span>
           </div>
 
-          {task.description && <p className="text-sm text-paper/70">{task.description}</p>}
+          <EditableTaskFields task={task} />
+
+          <AssigneePicker taskId={task.id} projectId={task.projectId} currentAssigneeId={task.assignee?.id ?? null} />
 
           <AttachmentList taskId={task.id} />
           <CommentThread taskId={task.id} />
           <SummarizeButton taskId={task.id} />
+
+          <div className="border-t border-line pt-4">
+            <DeleteTaskButton taskId={task.id} projectId={task.projectId} onDeleted={onClose} />
+          </div>
         </div>
       )}
     </Dialog>
