@@ -41,3 +41,26 @@ export async function getProjectDetail(projectId: string) {
   );
   return res.data.data.project;
 }
+export async function updateProject(
+  projectId: string,
+  payload: Partial<{ name: string; description: string; status: Project["status"] }>
+) {
+  const res = await api.patch<ApiResponse<{ project: Project }>>(`/projects/${projectId}`, payload);
+  return res.data.data.project;
+}
+
+export async function deleteProject(projectId: string) {
+  await api.delete(`/projects/${projectId}`);
+}
+
+export async function addProjectMember(projectId: string, userId: string) {
+  const res = await api.post<ApiResponse<{ membership: ProjectMember }>>(
+    `/projects/${projectId}/members`,
+    { userId }
+  );
+  return res.data.data.membership;
+}
+
+export async function removeProjectMember(projectId: string, userId: string) {
+  await api.delete(`/projects/${projectId}/members/${userId}`);
+}

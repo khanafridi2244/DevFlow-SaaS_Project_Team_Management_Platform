@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { listTasks, updateTaskStatus, TaskStatus } from "@/lib/tasks";
 import { getProject } from "@/lib/projects";
 import { BoardColumn } from "@/components/board/BoardColumn";
@@ -9,6 +9,7 @@ import { TaskDetailModal } from "@/components/task/TaskDetailModal";
 import { NewTaskDialog } from "@/components/board/NewTaskDialog";
 import { RiskPanel } from "@/components/project/RiskPanel";
 import { Button } from "@/components/ui/Button";
+import { ProjectSettingsDialog } from "@/components/project/ProjectSettingsDialog";
 
 const COLUMNS: TaskStatus[] = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"];
 
@@ -18,6 +19,7 @@ export default function ProjectBoardPage() {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { data: project } = useQuery({
     queryKey: ["project", projectId],
@@ -79,6 +81,9 @@ export default function ProjectBoardPage() {
             <Plus className="h-4 w-4" />
             New task
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => setIsSettingsOpen(true)}>
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -99,7 +104,10 @@ export default function ProjectBoardPage() {
       <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />
 
       {projectId && (
-        <NewTaskDialog projectId={projectId} open={isNewTaskOpen} onOpenChange={setIsNewTaskOpen} />
+        <>
+          <NewTaskDialog projectId={projectId} open={isNewTaskOpen} onOpenChange={setIsNewTaskOpen} />
+          <ProjectSettingsDialog projectId={projectId} open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+        </>
       )}
     </div>
   );
