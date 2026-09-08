@@ -23,3 +23,8 @@ export async function createComment(taskId: string, body: string) {
 export async function deleteComment(commentId: string) {
   await api.delete(`/comments/${commentId}`);
 }
+
+export async function updateComment(commentId: string, body: string) {
+  const res = await api.patch<ApiResponse<{ comment: Comment }>>(`/comments/${commentId}`, { body });
+  return res.data.data.comment;
+}
