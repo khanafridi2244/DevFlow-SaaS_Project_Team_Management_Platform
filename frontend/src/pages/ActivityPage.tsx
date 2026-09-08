@@ -6,6 +6,10 @@ import { getOrganizationActivity } from "@/lib/activities";
 const ACTION_LABELS: Record<string, string> = {
   COMMENT_ADDED: "commented on",
   ATTACHMENT_UPLOADED: "uploaded a file to",
+  TASK_CREATED: "created task",
+  TASK_STATUS_CHANGED: "moved task",
+  PROJECT_CREATED: "created project",
+  MEMBER_INVITED: "invited a new member to",
 };
 
 export default function ActivityPage() {
