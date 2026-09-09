@@ -4,6 +4,8 @@ import { AppShell } from "@/components/layout/AppShell";
 
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import ProjectBoardPage from "@/pages/ProjectBoardPage";
@@ -14,12 +16,15 @@ import MembersPage from "@/pages/MembersPage";
 import ActivityPage from "@/pages/ActivityPage";
 import BillingPage from "@/pages/BillingPage";
 
+
 export default function App() {
   return (
     <Routes>
       {/* Public routes — no auth required */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Protected routes — everything inside AppShell requires a
           valid session. AuthGuard redirects to /login if not authed,
