@@ -6,10 +6,14 @@ import { Sidebar } from "./Sidebar";
 import { NotificationBell } from "./NotificationBell";
 import { getMyOrganizations } from "@/lib/workspace";
 import { useWorkspaceStore } from "@/store/workspaceStore";
+import { useAuthStore } from "@/store/authStore";
+import { Link } from "react-router-dom";
 
 export function AppShell() {
   const setOrganizations = useWorkspaceStore((s) => s.setOrganizations);
+  const user = useAuthStore((s) => s.user);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["organizations"],
@@ -34,6 +38,19 @@ export function AppShell() {
           <div className="flex-1" />
           <NotificationBell />
         </header>
+        {user && !user.isEmailVerified && !bannerDismissed && (
+          <div className="flex items-center justify-between border-b border-warn/20 bg-warn-muted/20 px-4 py-2 text-sm">
+            <span className="text-paper/80">
+              Your email isn't verified yet.{" "}
+              <Link to="/verify-email" className="text-warn hover:underline">
+                Verify now
+              </Link>
+            </span>
+            <button onClick={() => setBannerDismissed(true)} className="text-paper/40 hover:text-paper">
+              Dismiss
+            </button>
+          </div>
+        )}
         <main className="overflow-y-auto">
           <Outlet />
         </main>

@@ -6,6 +6,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
+import VerifyEmailPage from "@/pages/auth/VerifyEmailPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import ProjectBoardPage from "@/pages/ProjectBoardPage";
@@ -25,7 +26,7 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       {/* Protected routes — everything inside AppShell requires a
           valid session. AuthGuard redirects to /login if not authed,
           rather than each page checking auth individually. */}
