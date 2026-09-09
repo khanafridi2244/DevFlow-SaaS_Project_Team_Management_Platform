@@ -21,3 +21,15 @@ export async function createOrganization(name: string) {
   });
   return res.data.data.organization;
 }
+
+export async function updateOrganization(organizationId: string, name: string) {
+  const res = await api.patch<ApiResponse<{ organization: Organization }>>(
+    `/organizations/${organizationId}`,
+    { name }
+  );
+  return res.data.data.organization;
+}
+
+export async function deleteOrganization(organizationId: string) {
+  await api.delete(`/organizations/${organizationId}`);
+}

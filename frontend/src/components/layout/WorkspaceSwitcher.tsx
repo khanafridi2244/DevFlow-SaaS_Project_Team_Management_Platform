@@ -1,15 +1,17 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronsUpDown, Check, Plus } from "lucide-react";
+import { ChevronsUpDown, Check, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createOrganization } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
+import { OrgSettingsDialog } from "./OrgSettingsDialog";
 
 export function WorkspaceSwitcher() {
   const { organizations, activeOrgId, setActiveOrgId } = useWorkspaceStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const activeOrg = organizations.find((o) => o.id === activeOrgId);
@@ -83,9 +85,21 @@ export function WorkspaceSwitcher() {
                 New workspace
               </DropdownMenu.Item>
             )}
+
+            <DropdownMenu.Separator className="my-1 h-px bg-line" />
+
+            <DropdownMenu.Item
+              onSelect={() => setIsSettingsOpen(true)}
+              className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-paper/70 outline-none hover:bg-white/5"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              Workspace settings
+            </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
+
+      <OrgSettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </div>
   );
 }
