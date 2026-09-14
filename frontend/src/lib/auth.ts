@@ -51,3 +51,7 @@ export async function forgotPassword(email: string) {
 export async function resetPassword(token: string, newPassword: string) {
   await api.post("/auth/reset-password", { token, newPassword });
 }
+
+export async function verifyEmail(token: string) {
+  await api.post("/auth/verify-email", { token });
+}
