@@ -25,20 +25,18 @@ describe("Dialog", () => {
   });
 
   it("centers using a flexbox wrapper, not a transform-based position", () => {
-    // This directly guards against the regression we found and fixed:
-    // Framer Motion's own transform (for the scale/y animation) was
-    // silently overriding Tailwind's left-1/2/-translate-x-1/2 centering
-    // trick, since inline styles beat stylesheet rules. The fix moved
-    // centering to a flex wrapper instead of relying on transform math.
-    // This test can't literally check computed CSS px values easily in
-    // jsdom, but it does verify the wrapper structure the fix depends on.
-    const { container } = render(
+    render(
       <Dialog open={true} onOpenChange={() => {}} title="Test">
         <p>Content</p>
       </Dialog>
     );
 
-    const flexWrapper = container.querySelector(".flex.items-center.justify-center");
+    // Query from `document.body` (where Radix portals render, outside
+    // the local render container) rather than the RTL-returned
+    // `container`, since Dialog uses RadixDialog.Portal — its content
+    // is NOT a descendant of the container render() returns.
+    const flexWrapper = document.body.querySelector(".flex.items-center.justify-center");
+    expect(flexWrapper).not.toBeNull();
     expect(flexWrapper).toBeInTheDocument();
   });
 });

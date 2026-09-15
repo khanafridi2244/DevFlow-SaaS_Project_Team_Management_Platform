@@ -46,8 +46,7 @@ describe("ProjectsPage", () => {
   it("calls createProject with the correct organizationId when a workspace IS selected", async () => {
     useWorkspaceStore.setState({
       activeOrgId: "org-123",
-      organizations: [{ id: "org-123", name: "Test Org", slug: "test-org", myRole: "OWNER" }],
-    });
+      organizations: [{ id: "org-123", name: "Test Org", slug: "test-org", logoUrl: null, myRole: "OWNER" }],    });
 
     const user = userEvent.setup();
     renderWithProviders(<ProjectsPage />);
@@ -56,19 +55,23 @@ describe("ProjectsPage", () => {
     await user.type(screen.getByLabelText(/project name/i), "My Project");
     await user.click(screen.getByRole("button", { name: /create project/i }));
 
+    // React Query's useMutation calls mutationFn with a second internal
+    // context argument we don't control — checking the FIRST call's
+    // FIRST argument is the correct way to assert on the actual payload
+    // our code passed, ignoring React Query's own internals.
     await waitFor(() => {
-      expect(projectsApi.createProject).toHaveBeenCalledWith({
-        organizationId: "org-123",
-        name: "My Project",
-      });
+      expect(projectsApi.createProject).toHaveBeenCalled();
     });
+    expect(projectsApi.createProject).toHaveBeenCalledWith(
+      { organizationId: "org-123", name: "My Project" },
+      expect.anything()
+    );
   });
 
   it("shows the empty state when there are no projects", async () => {
     useWorkspaceStore.setState({
       activeOrgId: "org-123",
-      organizations: [{ id: "org-123", name: "Test Org", slug: "test-org", myRole: "OWNER" }],
-    });
+      organizations: [{ id: "org-123", name: "Test Org", slug: "test-org", logoUrl: null, myRole: "OWNER" }],    });
 
     renderWithProviders(<ProjectsPage />);
 
