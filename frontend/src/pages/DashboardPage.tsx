@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Circle, Clock, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertTriangle, Sparkles } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { getOverview, getTasksByPriority, getCompletedPerWeek } from "@/lib/analytics";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const { data: overview } = useQuery({
     queryKey: ["analytics", "overview", activeOrgId],
     queryFn: () => getOverview(activeOrgId!),
-    enabled: !!activeOrgId, // don't fire until we actually have a workspace selected
+    enabled: !!activeOrgId,
   });
 
   const { data: priority } = useQuery({
@@ -37,11 +37,14 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-lg font-semibold text-paper">Dashboard</h1>
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-violet" />
+        <h1 className="text-lg font-semibold text-paper">Dashboard</h1>
+      </div>
       <p className="mt-1 text-sm text-paper/50">An overview of what's happening across your workspace.</p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard label="Total tasks" value={overview?.totalTasks ?? 0} icon={Circle} delay={0} />
+        <StatCard label="Total tasks" value={overview?.totalTasks ?? 0} icon={Circle} accent="signal" delay={0} />
         <StatCard
           label="Completed"
           value={overview?.completedTasks ?? 0}
@@ -53,7 +56,7 @@ export default function DashboardPage() {
           label="In progress"
           value={overview?.inProgressTasks ?? 0}
           icon={Clock}
-          accent="signal"
+          accent="indigo"
           delay={0.1}
         />
         <StatCard

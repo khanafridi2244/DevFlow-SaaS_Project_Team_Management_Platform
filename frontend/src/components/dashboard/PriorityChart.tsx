@@ -2,10 +2,10 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 
 import { TasksByPriority } from "@/lib/analytics";
 
 const PRIORITY_COLORS: Record<string, string> = {
-  LOW: "#6B7280",
+  LOW: "#94A3B8",
   MEDIUM: "#4F7CFF",
-  HIGH: "#E6A23C",
-  URGENT: "#EF4444",
+  HIGH: "#FB923C",
+  URGENT: "#F472B6",
 };
 
 export function PriorityChart({ data }: { data: TasksByPriority }) {

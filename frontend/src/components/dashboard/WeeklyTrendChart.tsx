@@ -31,9 +31,9 @@ export function WeeklyTrendChart({ data }: { data: WeeklySeries[] }) {
           <Line
             type="monotone"
             dataKey="count"
-            stroke="#4F7CFF"
+            stroke="#A78BFA"
             strokeWidth={2}
-            dot={{ fill: "#4F7CFF", r: 3 }}
+            dot={{ fill: "#A78BFA", r: 3 }}
           />
         </LineChart>
       </ResponsiveContainer>
