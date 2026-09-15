@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "lint": "eslint \"src/**/*.{ts,tsx}\"",
+  "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+  "test": "vitest run",
+  "test:watch": "vitest"
+},
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -52,6 +54,7 @@
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "vite": "^5.4.9",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "msw": "^2.4.11"
   }
 }
