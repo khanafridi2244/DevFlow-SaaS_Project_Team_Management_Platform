@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, Paperclip } from "lucide-react";
 import { Task } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/ui/Avatar";
 
 const RAIL_COLORS: Record<Task["status"], string> = {
   TODO: "bg-status-todo",
@@ -78,12 +79,8 @@ export function TaskCard({ task, isDragging, onDragStart, onClick }: TaskCardPro
       </div>
 
       {task.assignee && (
-        <div
-          className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-signal/20 font-mono text-[9px] text-signal"
-          title={`${task.assignee.firstName} ${task.assignee.lastName}`}
-        >
-          {task.assignee.firstName[0]}
-          {task.assignee.lastName[0]}
+        <div className="absolute right-2.5 top-2.5" title={`${task.assignee.firstName} ${task.assignee.lastName}`}>
+          <Avatar firstName={task.assignee.firstName} lastName={task.assignee.lastName} />
         </div>
       )}
     </motion.div>

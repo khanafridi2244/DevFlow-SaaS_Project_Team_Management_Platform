@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Dialog } from "@/components/ui/Dialog";
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/ui/Avatar";
 
 const ROLES: OrgRole[] = ["ADMIN", "MANAGER", "DEVELOPER", "VIEWER"];
 
@@ -76,10 +77,7 @@ export default function MembersPage() {
       <div className="mt-6 divide-y divide-line rounded-lg border border-line">
         {org?.members.map((member) => (
           <div key={member.id} className="flex items-center gap-3 px-4 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-signal/20 font-mono text-xs text-signal">
-              {member.user.firstName[0]}
-              {member.user.lastName[0]}
-            </div>
+            <Avatar firstName={member.user.firstName} lastName={member.user.lastName} size="md" />
             <div className="flex-1">
               <p className="text-sm text-paper">
                 {member.user.firstName} {member.user.lastName}

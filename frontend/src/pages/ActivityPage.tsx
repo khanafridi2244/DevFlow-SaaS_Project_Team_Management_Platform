@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { getOrganizationActivity } from "@/lib/activities";
+import { Avatar } from "@/components/ui/Avatar";
 
 const ACTION_LABELS: Record<string, string> = {
   COMMENT_ADDED: "commented on",
@@ -30,10 +31,7 @@ export default function ActivityPage() {
         {activities?.length === 0 && <p className="text-sm text-paper/30">No activity yet.</p>}
         {activities?.map((activity) => (
           <div key={activity.id} className="flex items-start gap-3 rounded px-2 py-2 hover:bg-white/[0.02]">
-            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signal/20 font-mono text-[9px] text-signal">
-              {activity.actor.firstName[0]}
-              {activity.actor.lastName[0]}
-            </div>
+            <Avatar firstName={activity.actor.firstName} lastName={activity.actor.lastName} />
             <div className="flex-1">
               <p className="text-sm text-paper/80">
                 <span className="font-medium text-paper">

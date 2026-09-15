@@ -5,6 +5,7 @@ import { Send, Pencil, Trash2, Check, X } from "lucide-react";
 import { listComments, createComment, updateComment, deleteComment } from "@/lib/comments";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/Button";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function CommentThread({ taskId }: { taskId: string }) {
   const [body, setBody] = useState("");
@@ -52,10 +53,7 @@ export function CommentThread({ taskId }: { taskId: string }) {
 
           return (
             <div key={comment.id} className="group flex gap-2.5">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signal/20 font-mono text-[9px] text-signal">
-                {comment.author.firstName[0]}
-                {comment.author.lastName[0]}
-              </div>
+              <Avatar firstName={comment.author.firstName} lastName={comment.author.lastName} />
               <div className="flex-1">
                 <div className="flex items-baseline gap-2">
                   <span className="text-sm font-medium text-paper">
