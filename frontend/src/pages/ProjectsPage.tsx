@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles, FolderKanban } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { listProjects, createProject } from "@/lib/projects";
 import { ProjectCard } from "@/components/project/ProjectCard";
@@ -50,7 +50,10 @@ export default function ProjectsPage() {
     <div className="p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-paper">Projects</h1>
+          <div className="flex items-center gap-2">
+            <FolderKanban className="h-4 w-4 text-indigo" />
+            <h1 className="text-lg font-semibold text-paper">Projects</h1>
+          </div>
           <p className="mt-1 text-sm text-paper/50">Everything your team is building.</p>
         </div>
         <div className="flex gap-2">

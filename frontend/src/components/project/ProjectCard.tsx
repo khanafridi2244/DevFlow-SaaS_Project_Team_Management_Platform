@@ -13,7 +13,7 @@ const STATUS_LABELS: Record<Project["status"], string> = {
 
 const STATUS_STYLES: Record<Project["status"], string> = {
   PLANNED: "bg-white/5 text-paper/60",
-  IN_PROGRESS: "bg-signal-muted text-signal",
+  IN_PROGRESS: "bg-indigo-muted text-indigo",
   ON_HOLD: "bg-warn-muted text-warn",
   COMPLETED: "bg-done-muted text-done",
   ARCHIVED: "bg-white/5 text-paper/30",
@@ -23,8 +23,9 @@ export function ProjectCard({ project, delay = 0 }: { project: Project; delay?: 
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay }}>
       <Link
+      
         to={`/projects/${project.id}`}
-        className="block rounded-lg border border-line bg-white/[0.02] p-4 transition-colors hover:border-signal/40 hover:bg-white/[0.04]"
+        className="block rounded-lg border border-line bg-white/[0.02] p-4 transition-all hover:border-indigo/40 hover:bg-white/[0.04] hover:shadow-[0_0_0_1px_rgba(99,102,241,0.2),0_8px_24px_rgba(99,102,241,0.1)]"
       >
         <div className="flex items-start justify-between">
           <h3 className="font-medium text-paper">{project.name}</h3>

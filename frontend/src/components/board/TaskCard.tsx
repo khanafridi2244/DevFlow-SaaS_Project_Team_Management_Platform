@@ -12,10 +12,10 @@ const RAIL_COLORS: Record<Task["status"], string> = {
 };
 
 const PRIORITY_DOT: Record<Task["priority"], string> = {
-  LOW: "bg-paper/20",
-  MEDIUM: "bg-signal/60",
-  HIGH: "bg-warn",
-  URGENT: "bg-red-500",
+  LOW: "bg-slate-400",
+  MEDIUM: "bg-signal",
+  HIGH: "bg-orange-400",
+  URGENT: "bg-pink-400",
 };
 
 interface TaskCardProps {
@@ -39,7 +39,7 @@ export function TaskCard({ task, isDragging, onDragStart, onClick }: TaskCardPro
       onDragStart={(e) => onDragStart(e as unknown as React.DragEvent, task.id)}
       onClick={onClick}
       className={cn(
-        "group relative cursor-grab overflow-hidden rounded border border-line bg-white/[0.02] pl-3 pr-3 py-2.5 active:cursor-grabbing",
+        "group relative cursor-grab overflow-hidden rounded border border-line bg-white/[0.02] pl-3 pr-3 py-2.5 transition-shadow hover:shadow-glow active:cursor-grabbing",
         isDragging && "opacity-40"
       )}
     >
