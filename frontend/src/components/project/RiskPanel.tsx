@@ -18,10 +18,18 @@ export function RiskPanel({ projectId }: { projectId: string }) {
 
   return (
     <div>
-      <Button variant="secondary" size="sm" onClick={() => mutation.mutate()} isLoading={mutation.isPending}>
-        <Sparkles className="h-3.5 w-3.5" />
+      <button
+        onClick={() => mutation.mutate()}
+        disabled={mutation.isPending}
+        className="inline-flex items-center gap-2 rounded bg-ai-gradient px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {mutation.isPending ? (
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        ) : (
+          <Sparkles className="h-3.5 w-3.5" />
+        )}
         Analyze risk
-      </Button>
+      </button>
 
       {mutation.isError && (
         <p className="mt-2 text-xs text-red-400">

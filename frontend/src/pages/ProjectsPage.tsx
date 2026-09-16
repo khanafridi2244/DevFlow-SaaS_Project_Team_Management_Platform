@@ -57,10 +57,13 @@ export default function ProjectsPage() {
           <p className="mt-1 text-sm text-paper/50">Everything your team is building.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => setIsAiDialogOpen(true)}>
+          <button
+            onClick={() => setIsAiDialogOpen(true)}
+            className="inline-flex items-center gap-2 rounded bg-ai-gradient px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          >
             <Sparkles className="h-4 w-4" />
             Generate with AI
-          </Button>
+          </button>
           <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="h-4 w-4" />
             New project

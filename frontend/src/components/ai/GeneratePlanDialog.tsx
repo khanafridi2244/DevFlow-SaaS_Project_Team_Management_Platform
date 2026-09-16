@@ -102,10 +102,18 @@ export function GeneratePlanDialog({ open, onOpenChange }: GeneratePlanDialogPro
             </p>
           )}
 
-          <Button type="submit" className="w-full" isLoading={planMutation.isPending}>
-            <Sparkles className="h-4 w-4" />
+          <button
+            type="submit"
+            disabled={planMutation.isPending}
+            className="flex w-full items-center justify-center gap-2 rounded bg-ai-gradient px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {planMutation.isPending ? (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             Generate plan
-          </Button>
+          </button>
         </form>
       )}
 
@@ -120,7 +128,7 @@ export function GeneratePlanDialog({ open, onOpenChange }: GeneratePlanDialogPro
 
           <div className="max-h-64 space-y-3 overflow-y-auto">
             {planMutation.data.phases.map((phase, i) => (
-              <div key={i} className="rounded border border-line p-3">
+              <div key={i} className="rounded border-l-2 border-l-pink-400/60 border-y border-r border-y-line border-r-line bg-white/[0.02] p-3">
                 <p className="text-sm font-medium text-paper">{phase.name}</p>
                 <ul className="mt-1.5 space-y-1">
                   {phase.tasks.map((task, j) => (

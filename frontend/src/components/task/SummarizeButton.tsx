@@ -15,15 +15,18 @@ export function SummarizeButton({ taskId }: { taskId: string }) {
 
   return (
     <div>
-      <Button
-        variant="secondary"
-        size="sm"
+      <button
         onClick={() => mutation.mutate()}
-        isLoading={mutation.isPending}
+        disabled={mutation.isPending}
+        className="inline-flex items-center gap-2 rounded bg-ai-gradient px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Sparkles className="h-3.5 w-3.5" />
+        {mutation.isPending ? (
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        ) : (
+          <Sparkles className="h-3.5 w-3.5" />
+        )}
         Summarize discussion
-      </Button>
+      </button>
 
       {mutation.isError && (
         <p className="mt-2 text-xs text-red-400">
@@ -33,14 +36,16 @@ export function SummarizeButton({ taskId }: { taskId: string }) {
 
       <AnimatePresence>
         {summary && (
-          <motion.div
+           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-3 overflow-hidden rounded border border-signal/20 bg-signal-muted/20 p-3"
+            className="mt-3 overflow-hidden rounded border border-transparent bg-ai-gradient-muted p-3"
+            style={{ borderImage: "linear-gradient(135deg, #F472B640, #FB923C40) 1" }}
           >
-            <p className="flex items-center gap-1.5 text-[11px] font-medium text-signal">
-              <Sparkles className="h-3 w-3" /> AI Summary
+            <p className="flex items-center gap-1.5 text-[11px] font-medium">
+              <Sparkles className="h-3 w-3 text-pink-400" />
+              <span className="bg-ai-gradient bg-clip-text text-transparent">AI Summary</span>
             </p>
             <p className="mt-1.5 text-sm text-paper/80">{summary}</p>
           </motion.div>
