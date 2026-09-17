@@ -29,17 +29,25 @@ export function PlanCard({ plan, isCurrent, canUpgrade, onSelect, isLoading }: P
   return (
     <div
       className={cn(
-        "rounded-lg border p-5",
-        isCurrent ? "border-signal bg-signal-muted/10" : "border-line bg-white/[0.02]"
+        "rounded-lg border p-5 transition-shadow",
+        isCurrent
+          ? "border-emerald bg-emerald-muted/10"
+          : plan === "PRO"
+            ? "border-indigo/40 bg-white/[0.02] hover:shadow-[0_0_0_1px_rgba(99,102,241,0.2),0_8px_24px_rgba(99,102,241,0.15)]"
+            : "border-line bg-white/[0.02]"
       )}
     >
       <div className="flex items-center justify-between">
         <h3 className="font-mono text-sm font-semibold text-paper">{plan}</h3>
-        {isCurrent && (
-          <span className="rounded bg-signal-muted px-2 py-0.5 font-mono text-[10px] text-signal">
+        {isCurrent ? (
+          <span className="rounded bg-emerald-muted px-2 py-0.5 font-mono text-[10px] text-emerald">
             Current
           </span>
-        )}
+        ) : plan === "PRO" ? (
+          <span className="rounded bg-indigo-muted px-2 py-0.5 font-mono text-[10px] text-indigo">
+            Popular
+          </span>
+        ) : null}
       </div>
       <p className="mt-1 text-2xl font-semibold text-paper">{info.price}</p>
 

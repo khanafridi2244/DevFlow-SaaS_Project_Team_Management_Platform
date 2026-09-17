@@ -22,7 +22,7 @@ export function UsageBar({ label, current, max }: UsageBarProps) {
       {!isUnlimited && (
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/5">
           <div
-            className={cn("h-full rounded-full transition-all", isNearLimit ? "bg-warn" : "bg-signal")}
+            className={cn("h-full rounded-full transition-all", isNearLimit ? "bg-warn" : "bg-emerald")}
             style={{ width: `${percent}%` }}
           />
         </div>

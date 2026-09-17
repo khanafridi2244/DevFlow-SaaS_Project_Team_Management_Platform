@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { getCalendarTasks } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
@@ -44,7 +44,10 @@ export default function CalendarPage() {
     <div className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-paper">Calendar</h1>
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4 text-signal" />
+            <h1 className="text-lg font-semibold text-paper">Calendar</h1>
+          </div>
           <p className="mt-1 text-sm text-paper/50">Everything due, across every project.</p>
         </div>
         <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserPlus, X } from "lucide-react";
+import { UserPlus, X, Users } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { getOrganizationDetail, inviteMember, updateMemberRole, removeMember, OrgRole } from "@/lib/members";
 import { Button } from "@/components/ui/Button";
@@ -63,7 +63,10 @@ export default function MembersPage() {
     <div className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-paper">Members</h1>
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-signal" />
+            <h1 className="text-lg font-semibold text-paper">Members</h1>
+          </div>
           <p className="mt-1 text-sm text-paper/50">Who has access to {org?.name}.</p>
         </div>
         {canManage && (

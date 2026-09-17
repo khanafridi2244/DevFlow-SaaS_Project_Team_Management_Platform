@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { Activity as ActivityIcon } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { getOrganizationActivity } from "@/lib/activities";
 import { Avatar } from "@/components/ui/Avatar";
@@ -24,9 +25,11 @@ export default function ActivityPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-lg font-semibold text-paper">Activity</h1>
+      <div className="flex items-center gap-2">
+        <ActivityIcon className="h-4 w-4 text-violet" />
+        <h1 className="text-lg font-semibold text-paper">Activity</h1>
+      </div>
       <p className="mt-1 text-sm text-paper/50">Everything happening across your workspace.</p>
-
       <div className="mt-6 space-y-1">
         {activities?.length === 0 && <p className="text-sm text-paper/30">No activity yet.</p>}
         {activities?.map((activity) => (

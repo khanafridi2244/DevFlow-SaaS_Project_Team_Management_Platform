@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreditCard } from "lucide-react";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { getSubscription, changePlan, Plan } from "@/lib/subscription";
 import { listProjects } from "@/lib/projects";
@@ -43,9 +44,11 @@ export default function BillingPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-lg font-semibold text-paper">Billing</h1>
+      <div className="flex items-center gap-2">
+        <CreditCard className="h-4 w-4 text-emerald" />
+        <h1 className="text-lg font-semibold text-paper">Billing</h1>
+      </div>
       <p className="mt-1 text-sm text-paper/50">Manage your plan and usage.</p>
-
       {sub && (
         <div className="mt-6 max-w-sm space-y-4 rounded-lg border border-line bg-white/[0.02] p-4">
           <h2 className="text-xs font-medium uppercase tracking-wide text-paper/40">Usage</h2>
